@@ -1,6 +1,7 @@
 {
-    "json_backup": {
+    "backup": {
         "backup_path": "backup.json",
+        "create_dir": 1,
         "debug_level": "INFO"
     }
 }

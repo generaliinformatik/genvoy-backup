@@ -24,9 +24,6 @@ import json
 from json import loads
 import git
 
-# the function 'hook_functions' is available from the main genvoy repository (https://github.com/generaliinformatik/genvoy)
-from hook_functions import replace_all_placeholders
-
 # ------------------------------- CONFIG SECTION - DO NOT EDIT ABOVE THIS LINE -------------------------------
 
 debug_level = "INFO"
@@ -37,10 +34,26 @@ config_context = "backup"
 
 logging.basicConfig(stream=stderr, level=logging.INFO)
 
-json_file = sys.argv[1]
-event_type = sys.argv[2]
 timestamp = time.strftime("%Y%m%d-%H%M%S")
 mypath = os.path.dirname(os.path.realpath(sys.argv[0]))
+
+try:
+    json_file = sys.argv[1] or None
+    logging.info(json_file)
+    event_type = sys.argv[2] or None
+    logging.info(event_type)
+
+    # the function 'hook_functions' is available from the main genvoy repository (https://github.com/generaliinformatik/genvoy)
+    from hook_functions import replace_all_placeholders
+except Exception:
+    logging.error("Required parameters missing. Abort.")
+    json_file = mypath + "/test/test.json"
+    event_type = "debug"
+
+    # the function 'hook_functions' is available from the main genvoy repository (https://github.com/generaliinformatik/genvoy)
+    from test.hook_functions import replace_all_placeholders
+#    sys.exit(1)
+
 
 config_file_plain = os.path.splitext(os.path.basename(__file__))[0]
 config_file = mypath + "/" + config_file_plain + ".json"
@@ -73,19 +86,21 @@ if debug_level != debug_level_old:
         logging.getLogger().setLevel(logging.CRITICAL)
     else:
         logging.getLogger().setLevel(logging.INFO)
-    logging.info("debug level set dynamically to: %s", debug_level)
+    logging.info("debug level set dynamically to: %s", (debug_level))
 
-logging.debug("%s: config file '%s'", event_type, config_file)
+logging.debug("config file '%s'", (config_file))
 
 # read config settings
 # backup_path = config.get('backup_path', "json")
 backup_path = replace_all_placeholders(
     "{%s/backup_path}" % (config_context), config, ""
 )
-logging.debug("config read - 'backup_path': %s", event_type, backup_path)
+logging.debug("config read - 'backup_path': %s", (backup_path))
+create_dir = replace_all_placeholders("{%s/create_dir}" % (config_context), config, 1)
+logging.debug("config read - 'create_dir': %s", (create_dir))
 
 # get event payload
-with open(sys.argv[1], "r") as jsf:
+with open(json_file, "r") as jsf:
     payload = json.loads(jsf.read())
 
 # backup evenry json
@@ -94,12 +109,14 @@ try:
 
     # try to create dir
     if not os.path.exists(backup_path):
-        try:
-            os.mkdir(backup_path)
-        except OSError:
-            logging.error("Creation of the directory %s failed" % backup_path)
-        else:
-            logging.debug("Successfully created the directory %s " % backup_path)
+        logging.debug("missing dir #1")
+        if create_dir == "1":
+            try:
+                os.mkdir(backup_path)
+            except OSError:
+                logging.error("Creation of the directory %s failed" % backup_path)
+            else:
+                logging.debug("Successfully created the directory %s " % backup_path)
 
     # check if dir exists (before or after creation)
     if os.path.exists(backup_path):
@@ -118,6 +135,9 @@ try:
             json.dump(payload, this_payloadexport)
             this_payloadexport.close()
 
-    logging.info("Backing up event JSON completed successfully.")
+        logging.info("Backing up event JSON completed successfully.")
+    else:
+        logging.error("Missing backup dir. Backup of of event JSON failed.")
+
 except Exception:
-    logging.error("Backing up event JSON failed.")
+    logging.error("Backup up of event JSON failed.")
