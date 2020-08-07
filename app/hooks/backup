@@ -15,13 +15,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-debug_level = "INFO"
-config_file = "backup.json"
-config_context = "backup"
-
-# ------------------------------- DO NOT EDIT BELOW THIS LINE -------------------------------
-
 import os
 import logging
 import time
@@ -30,8 +23,17 @@ from sys import stderr
 import json
 from json import loads
 import git
+
 # the function 'hook_functions' is available from the main genvoy repository (https://github.com/generaliinformatik/genvoy)
 from hook_functions import replace_all_placeholders
+
+# ------------------------------- CONFIG SECTION - DO NOT EDIT ABOVE THIS LINE -------------------------------
+
+debug_level = "INFO"
+config_file = "backup.json"
+config_context = "backup"
+
+# ------------------------------- CONFIG SECTION - DO NOT EDIT BELOW THIS LINE -------------------------------
 
 logging.basicConfig(stream=stderr, level=logging.INFO)
 
@@ -41,7 +43,7 @@ timestamp = time.strftime("%Y%m%d-%H%M%S")
 mypath = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 config_file_plain = os.path.splitext(os.path.basename(__file__))[0]
-config_file = mypath + '/' + config_file_plain + '.json'
+config_file = mypath + "/" + config_file_plain + ".json"
 
 # config_file = mypath + '/' + config_file
 # alternativly you can use 'eventy_type`als a dynamic variable to read configuration settings, e.g.:
@@ -51,11 +53,13 @@ config_file = mypath + '/' + config_file_plain + '.json'
 #   config_file = mypath + '/' + config_file_prefix + '.json'
 
 # Load config
-with open(config_file, 'r') as cfg:
+with open(config_file, "r") as cfg:
     config = loads(cfg.read())
 
 debug_level_old = debug_level
-debug_level = str(replace_all_placeholders("{%s/debug_level}" % (config_context), config, ""))
+debug_level = str(
+    replace_all_placeholders("{%s/debug_level}" % (config_context), config, "")
+)
 if debug_level != debug_level_old:
     if debug_level == "DEBUG":
         logging.getLogger().setLevel(logging.DEBUG)
@@ -74,12 +78,14 @@ if debug_level != debug_level_old:
 logging.debug("%s: config file '%s'", event_type, config_file)
 
 # read config settings
-#backup_path = config.get('backup_path', "json")
-backup_path = replace_all_placeholders("{%s/backup_path}" % (config_context), config, "")
+# backup_path = config.get('backup_path', "json")
+backup_path = replace_all_placeholders(
+    "{%s/backup_path}" % (config_context), config, ""
+)
 logging.debug("config read - 'backup_path': %s", event_type, backup_path)
 
 # get event payload
-with open(sys.argv[1], 'r') as jsf:
+with open(sys.argv[1], "r") as jsf:
     payload = json.loads(jsf.read())
 
 # backup evenry json
@@ -91,20 +97,27 @@ try:
         try:
             os.mkdir(backup_path)
         except OSError:
-            logging.error ("Creation of the directory %s failed" % backup_path)
+            logging.error("Creation of the directory %s failed" % backup_path)
         else:
             logging.debug("Successfully created the directory %s " % backup_path)
 
     # check if dir exists (before or after creation)
     if os.path.exists(backup_path):
         # pylint: disable=line-too-long
-        backup_file = backup_path+'/'+ time.strftime("%Y%m%d-%H%M%S")+'-' + event_type + '.json'
+        backup_file = (
+            backup_path
+            + "/"
+            + time.strftime("%Y%m%d-%H%M%S")
+            + "-"
+            + event_type
+            + ".json"
+        )
 
         logging.debug("backup file set: %s", backup_file)
-        with open(backup_file, 'w') as this_payloadexport:
+        with open(backup_file, "w") as this_payloadexport:
             json.dump(payload, this_payloadexport)
             this_payloadexport.close()
 
     logging.info("Backing up event JSON completed successfully.")
-except:
+except Exception:
     logging.error("Backing up event JSON failed.")
