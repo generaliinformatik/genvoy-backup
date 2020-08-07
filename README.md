@@ -1,3 +1,4 @@
+![Travis CI](https://travis-ci.org/generaliinformatik/genvoy-backup.svg?branch=master) [![codecov](https://codecov.io/gh/generaliinformatik/genvoy-backup/branch/master/graph/badge.svg)](https://codecov.io/gh/generaliinformatik/genvoy-backup)
 
 # Genvoy - Backup
 <a id="markdown-genvoy---backup" name="genvoy---backup"></a>
