@@ -46,14 +46,11 @@ try:
     # the function 'hook_functions' is available from the main genvoy repository (https://github.com/generaliinformatik/genvoy)
     from hook_functions import replace_all_placeholders
 except Exception:
-    logging.error("Required parameters missing. Abort.")
-    json_file = mypath + "/test/test.json"
-    event_type = "debug"
-
-    # the function 'hook_functions' is available from the main genvoy repository (https://github.com/generaliinformatik/genvoy)
-    from test.hook_functions import replace_all_placeholders
-#    sys.exit(1)
-
+    logging.error("Required parameters missing. Nothing to do.")
+    #    json_file = mypath + "/test/test.json"
+    #    event_type = "debug"
+    #    from test.hook_functions import replace_all_placeholders
+    sys.exit(0)
 
 config_file_plain = os.path.splitext(os.path.basename(__file__))[0]
 config_file = mypath + "/" + config_file_plain + ".json"
