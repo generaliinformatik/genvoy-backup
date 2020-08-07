@@ -43,7 +43,7 @@ The following steps are required for commissioning:
 3. Copy the script `hooks/backup` from the Genvoy clone repository into the `hooks` directory of the Genvoy Framework directory
 4. Name the script file in `{event}-backup` (where `{event}` is the event to be monitored, assuming e.g. `all`)
 5. Set the execute flag of the script `hooks/all-backup` (via chmod +x)
-6. Adjust the settings in the configuration file `backup.json` to your requirements
+6. Adjust the settings in the configuration file `app/hooks/backup.json` to your requirements
 
 ## Docker
 <a id="markdown-docker" name="docker"></a>
