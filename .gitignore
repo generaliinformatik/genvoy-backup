@@ -2,7 +2,7 @@
 docs/images/*.pxm
 .pytest_cache/
 backup.json/
-Backup.json/*
+backup.json/*
 app/hooks/__pycache__
 app/hooks/__pycache__/
 app/hooks/test/__pycache__
